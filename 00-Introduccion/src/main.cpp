@@ -55,6 +55,7 @@ Box boxCesped;
 Box boxWalls;
 Box boxHighway;
 Box boxLandingPad;
+Sphere esfera1(20, 20); 
 // Models complex instances
 Model modelRock;
 Model modelAircraft;
@@ -81,7 +82,7 @@ Model modelDartLegoRightHand;
 Model modelDartLegoLeftLeg;
 Model modelDartLegoRightLeg;
 
-GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID; //, textureLandingPadID;
+GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint skyboxTextureID;
 
 GLenum types[6] = {
@@ -188,6 +189,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(0);
 
+	// Eventos de teclado y pantalla
 	glfwSetWindowSizeCallback(window, reshapeCallback);
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, mouseCallback);
@@ -202,6 +204,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		exit(-1);
 	}
 
+	// Init Viewport
 	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
@@ -214,6 +217,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderMulLighting.initialize("../Shaders/iluminacion_texture_res.vs", "../Shaders/multipleLights.fs");
 
 	// Inicializacion de los objetos.
+	// Init - inicializa el objeto
+	// setShader - Se referencia al Shader
+
 	skyboxSphere.init();
 	skyboxSphere.setShader(&shaderSkybox);
 	skyboxSphere.setScale(glm::vec3(20.0f, 20.0f, 20.0f));
@@ -226,6 +232,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	boxHighway.init();
 	boxHighway.setShader(&shaderMulLighting);
+
+	// Esfera
+	esfera1.init();
+	esfera1.setShader(&shaderMulLighting);
+	esfera1.setScale(glm::vec3(3.0f, 3.0f, 3.0f));
 
 	boxLandingPad.init();
 	boxLandingPad.setShader(&shaderMulLighting);
@@ -424,6 +435,32 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		std::cout << "Failed to load texture" << std::endl;
 	// Libera la memoria de la textura
 	textureHighway.freeImage();
+
+	// Definiendo la textura 
+	Texture textureLandingPad("../Textures/landingPad.jpg"); // Metodo Constructor
+	textureLandingPad.loadImage(); // Cargar la textura
+	
+	glGenTextures(1, &textureLandingPadID); // Creando el id de la textura del landingpad
+	glBindTexture(GL_TEXTURE_2D, textureLandingPadID); // Se enlaza la textura
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Wrapping en el eje u 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Wrapping en el eje v
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Filtering de Minimización
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Filtering de Maximización
+	// Validar que la textura se haya cargado correctamente
+	if (textureLandingPad.getData()){
+		// Transferir los datos de la imagen a la tarjeta
+		// Tipo de Textura, 0, formato de la imagen
+		glTexImage2D(GL_TEXTURE_2D, 0, textureLandingPad.getChannels() == 3 ? GL_RGB : GL_RGBA,
+		textureLandingPad.getWidth(), textureLandingPad.getHeight(), 0 , textureLandingPad.getChannels() == 3 ? GL_RGB : GL_RGBA,
+		GL_UNSIGNED_BYTE, textureLandingPad.getData());
+		// Ajuste para que la texturas se vean mejor mediante una pila de imagenes
+		glGenerateMipmap(GL_TEXTURE_2D); 
+	} else {
+		std::cout << "Fallo la carga de la textura" << std::endl;
+	}
+		// Liberar memoria 
+		textureLandingPad.freeImage();
 }
 
 void destroy() {
@@ -443,6 +480,7 @@ void destroy() {
 	boxWalls.destroy();
 	boxHighway.destroy();
 	boxLandingPad.destroy();
+	esfera1.destroy();
 
 	// Custom objects Delete
 	modelAircraft.destroy();
@@ -475,6 +513,7 @@ void destroy() {
 	glDeleteTextures(1, &textureWallID);
 	glDeleteTextures(1, &textureWindowID);
 	glDeleteTextures(1, &textureHighwayID);
+	glDeleteTextures(1, &textureLandingPadID);
 
 	// Cube Maps Delete
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -666,6 +705,7 @@ void applicationLoop() {
 
 	while (psi) {
 		currTime = TimeManager::Instance().GetTime();
+		// Framerate 60 fps - 0.016666667
 		if(currTime - lastTime < 0.016666667){
 			glfwPollEvents();
 			continue;
@@ -809,6 +849,42 @@ void applicationLoop() {
 		boxHighway.setPosition(glm::vec3(0.0, 0.05, -35.0));
 		boxHighway.setOrientation(glm::vec3(0.0, 0.0, 0.0));
 		boxHighway.render();
+
+		/*******************************************
+		 * Esfera 1
+		 *******************************************/
+		glActiveTexture(GL_TEXTURE0);						// Activar la textura
+		glBindTexture(GL_TEXTURE_2D, textureHighwayID);		// Que tipo de textura e identificador
+		shaderMulLighting.setInt("texture1", 0); 
+		esfera1.setScale(glm::vec3(2.0f, 2.0f, 2.0f));		// ESCALA
+		esfera1.setPosition(glm::vec3(3.0f, 2.0f, -10.0f)); // Position 
+		esfera1.render();									// Renderiza el objeto
+
+		glActiveTexture(GL_TEXTURE0);						// Activar la textura
+		glBindTexture(GL_TEXTURE_2D, textureWallID);		// Que tipo de textura e identificador
+		shaderMulLighting.setInt("texture1", 0);
+		esfera1.setScale(glm::vec3(4.0f, 4.0f, 4.0f));		// ESCALA
+		esfera1.setPosition(glm::vec3(3.0f, 2.0f, 10.0f));	// Position 
+		esfera1.enableWireMode(); 							// Habilita el modo Malla
+		esfera1.render();									// Renderiza el objeto
+		esfera1.enableFillMode();							// Habilita el modo relleno
+
+		/*******************************************
+		 * Landing pad 
+		 *******************************************/
+		boxLandingPad.setScale(glm::vec3(10.0f, 0.05f, 10.0f));
+		boxLandingPad.setPosition(glm::vec3(5.0f, 0.05f, -5.0f));
+		boxLandingPad.setOrientation(glm::vec3(0.0f, 0.0f, 0.0f));
+		glActiveTexture(GL_TEXTURE0);							// Activar la textura
+		glBindTexture(GL_TEXTURE_2D, textureLandingPadID);		// Que tipo de textura e identificador
+		shaderMulLighting.setInt("texture1", 0);
+		// Para repitir la textura
+		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(1.0f, 2.0f)));
+		boxLandingPad.render();
+		// Se regresa la textura original
+		shaderMulLighting.setVectorFloat2("scaleUV", glm::value_ptr(glm::vec2(1.0f, 1.0f)));
+		glBindTexture(GL_TEXTURE_2D, 0);
+		
 
 		/*******************************************
 		 * Custom objects obj
