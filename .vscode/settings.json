@@ -1,0 +1,4 @@
+{
+    // Se debe ingresar la ruta donde se encuentre el Cmake
+    "cmake.cmakePath": "C:/Program Files/cmake-3.27.4/bin/cmake",
+}
