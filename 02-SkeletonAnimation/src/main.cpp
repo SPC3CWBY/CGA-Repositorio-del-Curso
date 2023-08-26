@@ -666,16 +666,12 @@ void applicationLoop() {
 	modelMatrixEclipse = glm::translate(modelMatrixEclipse, glm::vec3(27.5, 0, 30.0));
 	modelMatrixEclipse = glm::rotate(modelMatrixEclipse, glm::radians(180.0f), glm::vec3(0, 1, 0));
 	int state = 0;
-	// Numero de avance
 	float advanceCount = 0.0;
 	float rotCount = 0.0;
 	float rotWheelsX = 0.0;
 	float rotWheelsY = 0.0;
-	// Recorrido 
 	int numberAdvance = 0;
 	int maxAdvance = 0.0;
-	const float avanceEclipse = 0.05; // Velocidad del Eclipse
-	const float rotEclipse = 0.5; // Velocidad de Rotacion del Eclipse
 
 	matrixModelRock = glm::translate(matrixModelRock, glm::vec3(-3.0, 0.0, 2.0));
 
@@ -1000,63 +996,6 @@ void applicationLoop() {
 
 		// Constantes de animaciones
 		rotHelHelY += 0.5;
-
-		/*******************************************
-		 * Maquinas de estados para Movimiento Eclipse
-		 *******************************************/
-		switch (state) {
-		case 0:
-			if (numberAdvance == 0) {
-				maxAdvance = 65.0f;
-			} else if (numberAdvance == 1) {
-				maxAdvance = 49.0f;
-			} else if (numberAdvance == 2) {
-				maxAdvance = 44.5f;
-			} else if (numberAdvance == 3) {
-				maxAdvance = 49.0f;
-			} else if (numberAdvance == 4) {
-				maxAdvance = 44.5f;
-			}
-			state = 1;
-			break;
-		case 1:
-				modelMatrixEclipse = glm::translate(modelMatrixEclipse,
-				glm::vec3(0.0f, 0.0f, avanceEclipse));
-			// Avanza el Eclipse
-			advanceCount += avanceEclipse;
-			// Gira la rueda en X and Y 
-			rotWheelsX += 0.025;
-			rotWheelsY -= 0.0025;
-			if (rotWheelsY < 0)
-				rotWheelsY = 0.0;
-			if (advanceCount > maxAdvance)
-			{
-				advanceCount = 0.0;
-				state = 2;
-				if (advanceCount > 4)
-					advanceCount = 1;				
-			}
-			break;
-		case 2:
-			modelMatrixEclipse = glm::translate(modelMatrixEclipse, glm::vec3(0.0f, 0.0f, 0.025f));
-			modelMatrixEclipse = glm::rotate(modelMatrixEclipse, 
-				glm::radians(rotEclipse), glm::vec3(0.0f, 1.0f, 0.0f));
-			// Gira el eclipse
-			rotCount += rotEclipse;
-			// Gira la rueda en Y
-			rotWheelsY += 0.0025;
-			if (rotWheelsY > 0.25)
-				rotWheelsY = 0.25;
-			if (rotCount > 90.0)	
-			{
-				rotCount = 0.0;
-				state = 0;
-			}
-			break;
-		default:
-			break;
-		}
-
 
 		glfwSwapBuffers(window);
 	}
