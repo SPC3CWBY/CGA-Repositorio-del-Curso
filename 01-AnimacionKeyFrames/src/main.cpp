@@ -64,6 +64,7 @@ Model modelEclipseRearWheels;
 Model modelEclipseFrontalWheels;
 Model modelHeliChasis;
 Model modelHeliHeli;
+Model modelHeliRear;
 Model modelLambo;
 Model modelLamboLeftDor;
 Model modelLamboRightDor;
@@ -252,6 +253,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelHeliChasis.setShader(&shaderMulLighting);
 	modelHeliHeli.loadModel("../models/Helicopter/Mi_24_heli.obj");
 	modelHeliHeli.setShader(&shaderMulLighting);
+	modelHeliRear.loadModel("../models/Helicopter/Mi_24_heli_rear.obj");
+	modelHeliRear.setShader(&shaderMulLighting);
 	// Lamborginhi
 	modelLambo.loadModel("../models/Lamborginhi_Aventador_OBJ/Lamborghini_Aventador_chasis.obj");
 	modelLambo.setShader(&shaderMulLighting);
@@ -485,6 +488,7 @@ void destroy() {
 	modelEclipseRearWheels.destroy();
 	modelHeliChasis.destroy();
 	modelHeliHeli.destroy();
+	modelHeliRear.destroy();
 	modelLambo.destroy();
 	modelLamboFrontLeftWheel.destroy();
 	modelLamboFrontRightWheel.destroy();
@@ -911,6 +915,18 @@ void applicationLoop() {
 		modelMatrixHeliHeli = glm::rotate(modelMatrixHeliHeli, rotHelHelY, glm::vec3(0, 1, 0));
 		modelMatrixHeliHeli = glm::translate(modelMatrixHeliHeli, glm::vec3(0.0, 0.0, 0.249548));
 		modelHeliHeli.render(modelMatrixHeliHeli);
+
+			// HeliRear
+		glm::mat4 modelMatrixHeliRear = glm::mat4(modelMatrixHeliChasis);
+		modelMatrixHeliRear = glm::translate(modelMatrixHeliRear,
+			glm::vec3(0.298,2.1149,-5.66));
+		modelMatrixHeliRear = glm::rotate(modelMatrixHeliRear,
+			// glm::radians(rotHeliRear),glm::vec3(1,0,0)
+			// glm::radians(rotHelHelY),glm::vec3(1,0,0)
+			rotHelHelY,glm::vec3(1,0,0)
+		);
+		modelMatrixHeliRear = glm::translate(modelMatrixHeliRear,glm::vec3(-0.298,-2.1149,5.66));
+		modelHeliRear.render(modelMatrixHeliRear);
 
 		// Lambo car
 		glDisable(GL_CULL_FACE);
