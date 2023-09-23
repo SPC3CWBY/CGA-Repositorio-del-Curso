@@ -83,6 +83,18 @@ Model modelDartLegoRightHand;
 Model modelDartLegoLeftLeg;
 Model modelDartLegoRightLeg;
 
+// Carga del Modelo mayow 
+Model modelMayow;
+
+// Model modelBob
+Model modelBob;
+
+// Model modelCowboy
+Model modelCowboy;
+
+// Model modelCyborg
+Model modelCyborg;
+
 // Buzz
 Model modelBuzzTorso;
 Model modelBuzzHead;
@@ -331,6 +343,22 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelBuzzLeftForeArm.setShader(&shaderMulLighting);
 	modelBuzzLeftHand.loadModel("../models/buzz/buzzlightyLeftHand.obj");
 	modelBuzzLeftHand.setShader(&shaderMulLighting);
+
+	// Model de mayow
+	modelMayow.loadModel("../models/mayow/personaje2.fbx")
+	modelMayow.setShader(&shaderMulLighting);
+	
+	// Model bob
+	modelMayow.loadModel("../models/boblampclean/boblampclean.md5anim")
+	modelMayow.setShader(&shaderMulLighting);
+
+	// Model Cowboy
+	modelMayow.loadModel("../models/models/cowboy/Character Running.fbx")
+	modelMayow.setShader(&shaderMulLighting);
+
+	// Model Cyborg
+	modelMayow.loadModel("../models/models/cyborg/cyborg.fbx")
+	modelMayow.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 	
