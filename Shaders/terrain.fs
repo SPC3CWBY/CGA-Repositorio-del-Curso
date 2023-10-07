@@ -40,6 +40,7 @@ const int MAX_POINT_LIGHTS = 20;
 const int MAX_SPOT_LIGHTS = 1;
 
 out vec4 color;
+out vec4 totalColor;
 
 in vec3 fragPos;  
 in vec3 our_normal;
@@ -58,6 +59,11 @@ uniform vec2 scaleUV;
   
 uniform sampler2D backgroundTexture;
 
+uniform sampler2D textureR;
+uniform sampler2D textureG;
+uniform sampler2D textureB;
+uniform sampler2D textureBlendMap;
+
 vec3 calculateDirectionalLight(Light light, vec3 direction){
 	vec2 tiledCoords = our_uv;
 	if(tiledCoords.x != 0 && tiledCoords.y != 0)
@@ -65,6 +71,14 @@ vec3 calculateDirectionalLight(Light light, vec3 direction){
 	
 	vec4 backgroundTextureColor = texture(backgroundTexture, tiledCoords);
 	vec4 totalColor = backgroundTextureColor;
+
+	vec4 blendMapColor = texture(textureBlendMap, our_uv);
+	float cantidadColorBlendMap = 1 - (blendMapColor.r + blendMapColor.g + blendMapColor.b);
+	vec4 colorTextureBackground = texture(backgroundTexture, tiledCoords) * cantidadColorBlendMap;
+	vec4 colorTextureR = texture(textureR, tiledCoords) * blendMapColor.r;
+	vec4 colorTextureG = texture(textureG, tiledCoords) * blendMapColor.g;
+	vec4 colorTextureB = texture(textureB, tiledCoords) * blendMapColor.b;
+	totalColor = colorTextureBackground + colorTextureR + colorTextureG + colorTextureB;
 
 	// Ambient
     vec3 ambient  = light.ambient * vec3(totalColor);

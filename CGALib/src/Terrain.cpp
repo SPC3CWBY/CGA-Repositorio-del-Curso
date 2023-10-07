@@ -88,7 +88,7 @@ float Terrain::getHeight(int x, int z, unsigned char * data, int imageWidth, int
 	float r = data[x * numeroCanales + z * (imageWidth * numeroCanales)];
 	float g = data[x * numeroCanales + z * (imageWidth * numeroCanales) + 1];
 	float b = data[x * numeroCanales + z * (imageWidth * numeroCanales) + 2];
-	float height = b * g * r;
+	float height = r;
 	height /= MAX_PIXEL_COLOR;
 	//height -= 0.5;
 	height *= maxHeight;

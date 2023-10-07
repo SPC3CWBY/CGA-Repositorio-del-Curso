@@ -527,7 +527,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	// Sponge Texture
 	// Definiendo la textura
-	Texture textureSponge("../Textures/texturaLadrillos.jpg");
+	Texture textureSponge("../Textures/sponge02.jpg");
 	textureSponge.loadImage(); // Cargar la textura
 	glGenTextures(1, &textureSpongeID); // Creando el id de la textura del landingpad
 	glBindTexture(GL_TEXTURE_2D, textureSpongeID); // Se enlaza la textura
