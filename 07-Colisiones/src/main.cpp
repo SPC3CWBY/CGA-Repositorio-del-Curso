@@ -216,6 +216,12 @@ std::vector<float> lamp2Orientation = {
 double deltaTime;
 double currTime, lastTime;
 
+// Variables para el salto
+bool isJump = false; 	// Si esta brincando
+float GRAVITY = 1.81;	// Gravedad
+float tmv = 0.0;
+float startTimeJump = 0.0;
+
 // Variables animacion maquina de estados eclipse
 const float avance = 0.1;
 const float giroEclipse = 0.5f;
@@ -935,6 +941,13 @@ bool processInput(bool continueApplication) {
 		animationMayowIndex = 0;
 	}
 
+	bool statusKeySpace = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+	if (!isJump && statusKeySpace){
+		startTimeJump = currTime;
+		tmv = 0;
+		isJump = true;
+	}
+
 	glfwPollEvents();
 	return continueApplication;
 }
@@ -1347,7 +1360,18 @@ void applicationLoop() {
 		modelMatrixMayow[0] = glm::vec4(ejex, 0.0);
 		modelMatrixMayow[1] = glm::vec4(ejey, 0.0);
 		modelMatrixMayow[2] = glm::vec4(ejez, 0.0);
-		modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+		// Brinco parabolico de Mayow
+		float alturaActual = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+		modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.1 * tmv 
+			+ alturaActual;
+		tmv = currTime - startTimeJump;
+		if (modelMatrixMayow[3][1] <= alturaActual){
+			isJump = false;
+			modelMatrixMayow[3][1] = alturaActual;
+		}
+
+
+		// modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
 		glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021f));
 		mayowModelAnimate.setAnimationIndex(animationMayowIndex);

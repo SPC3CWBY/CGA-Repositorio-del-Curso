@@ -21,6 +21,9 @@
 #include "Headers/Cylinder.h"
 #include "Headers/Box.h"
 #include "Headers/FirstPersonCamera.h"
+// THRID PERSORN CAMERA 
+#include "Headers/ThirdPersonCamera.h"
+
 
 //GLM include
 #define GLM_FORCE_RADIANS
@@ -53,7 +56,11 @@ Shader shaderMulLighting;
 //Shader para el terreno
 Shader shaderTerrain;
 
-std::shared_ptr<FirstPersonCamera> camera(new FirstPersonCamera());
+// std::shared_ptr<FirstPersonCamera> camera(new FirstPersonCamera());
+// Creando la Camara en Tercera Persona
+std::shared_ptr<Camera> camera(new ThirdPersonCamera());
+float distanceFromTarget = 7.0;
+
 
 Sphere skyboxSphere(20, 20);
 Box boxCesped;
@@ -224,6 +231,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action,
 		int mode);
 void mouseCallback(GLFWwindow *window, double xpos, double ypos);
 void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod);
+void scrollCallback(GLFWwindow *Window, double xoffset, double yoffset); // Scroll del Mouse
 void init(int width, int height, std::string strTitle, bool bFullScreen);
 void destroy();
 bool processInput(bool continueApplication = true);
@@ -265,6 +273,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, mouseCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
+	glfwSetScrollCallback(window, scrollCallback);	// Scroll Callback
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	// Init glew
@@ -403,9 +412,17 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Terreno
 	terrain.init();
 	terrain.setShader(&shaderTerrain);
-
-	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 	
+	// Configuración para Camara en primera persona
+	// camera->setPosition(glm::vec3(0.0, 3.0, 4.0)); 
+
+	// Third Person Camera
+	camera->setPosition(glm::vec3(0.0, 3.0, 4.0)); 
+	camera -> setSensitivity(1.0f);
+	camera -> setDistanceFromTarget(distanceFromTarget);
+
+
+
 	// Carga de texturas para el skybox
 	Texture skyboxTexture = Texture("");
 	glGenTextures(1, &skyboxTextureID);
@@ -745,6 +762,13 @@ void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
 	lastMousePosY = ypos;
 }
 
+void scrollCallback(GLFWwindow *Window, double xoffset, double yoffset){
+	// Scroll del Mouse	
+	distanceFromTarget -= yoffset;
+	camera -> setDistanceFromTarget(distanceFromTarget);
+} 
+
+
 void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 	if (state == GLFW_PRESS) {
 		switch (button) {
@@ -766,7 +790,7 @@ bool processInput(bool continueApplication) {
 	if (exitApp || glfwWindowShouldClose(window) != 0) {
 		return false;
 	}
-
+	/*  FIRST PERSON CAMERA
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera->moveFrontCamera(true, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -776,7 +800,12 @@ bool processInput(bool continueApplication) {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera->moveRightCamera(true, deltaTime);
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-		camera->mouseMoveCamera(offsetX, offsetY, deltaTime);
+		camera->mouseMoveCamera(offsetX, offsetY, deltaTime); */
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+		camera -> mouseMoveCamera(offsetX, 0, deltaTime);
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+		camera -> mouseMoveCamera(0, offsetY, deltaTime);
 	offsetX = 0;
 	offsetY = 0;
 
@@ -936,6 +965,12 @@ bool processInput(bool continueApplication) {
 void applicationLoop() {
 	bool psi = true;
 
+	float angleTarget;
+	glm::vec3 axis;
+	glm::vec3 target;
+	
+
+
 	modelMatrixEclipse = glm::translate(modelMatrixEclipse, glm::vec3(27.5, 0, 30.0));
 	modelMatrixEclipse = glm::rotate(modelMatrixEclipse, glm::radians(180.0f), glm::vec3(0, 1, 0));
 	int state = 0;
@@ -999,6 +1034,29 @@ void applicationLoop() {
 				(float) screenWidth / (float) screenHeight, 0.01f, 100.0f);
 		glm::mat4 view = camera->getViewMatrix();
 
+		if(modelSelected == 1){
+			target = modelMatrixDart[3];
+			angleTarget = glm::angle(glm::quat_cast(modelMatrixDart));
+			axis = glm::axis(glm::quat_cast(modelMatrixDart));
+		} else {
+			target = modelMatrixMayow[3];
+			angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
+			axis = glm::axis(glm::quat_cast(modelMatrixMayow));
+		}
+
+		if(std::isnan(angleTarget))
+			angleTarget = 0;
+		
+		if (axis.y < 0)
+			angleTarget = -angleTarget;
+		
+		// Girar 90 grados para ver a Dart desde atras
+		if (modelSelected == 1)
+			angleTarget -= glm::radians(90.0f);
+		camera -> setAngleTarget(angleTarget);
+		camera -> setCameraTarget(target);
+		camera -> updateCamera();
+
 		// Settea la matriz de vista y projection al shader con solo color
 		shader.setMatrix4("projection", 1, false, glm::value_ptr(projection));
 		shader.setMatrix4("view", 1, false, glm::value_ptr(view));
@@ -1023,13 +1081,13 @@ void applicationLoop() {
 		 * Propiedades Luz direccional
 		 *******************************************/
 		shaderMulLighting.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
-		shaderMulLighting.setVectorFloat3("directionalLight.light.ambient", glm::value_ptr(glm::vec3(0.05, 0.05, 0.05)));
+		shaderMulLighting.setVectorFloat3("directionalLight.light.ambient", glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
 		shaderMulLighting.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
 		shaderMulLighting.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.4, 0.4, 0.4)));
 		shaderMulLighting.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-1.0, 0.0, 0.0)));
 
 		shaderTerrain.setVectorFloat3("viewPos", glm::value_ptr(camera->getPosition()));
-		shaderTerrain.setVectorFloat3("directionalLight.light.ambient", glm::value_ptr(glm::vec3(0.05, 0.05, 0.05)));
+		shaderTerrain.setVectorFloat3("directionalLight.light.ambient", glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
 		shaderTerrain.setVectorFloat3("directionalLight.light.diffuse", glm::value_ptr(glm::vec3(0.3, 0.3, 0.3)));
 		shaderTerrain.setVectorFloat3("directionalLight.light.specular", glm::value_ptr(glm::vec3(0.4, 0.4, 0.4)));
 		shaderTerrain.setVectorFloat3("directionalLight.direction", glm::value_ptr(glm::vec3(-1.0, 0.0, 0.0)));
