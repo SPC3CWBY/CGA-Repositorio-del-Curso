@@ -72,7 +72,7 @@ float calculateShadow(vec3 lightDir){
     float currentDepth = projCoords.z;
 
     // This is the first version of the shadow mapping with shadow acne
-    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    // float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
 
     // This is the second version of the shadow mapping with shadow bias to correct the shadow acne
     // float bias = 0.005;
@@ -84,29 +84,29 @@ float calculateShadow(vec3 lightDir){
 	// float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
 
 	// This is the four version of the shadow mapping with shadow bias to correct the shadow acne
-	// vec3 normal = normalize(our_normal);
-	// float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);  
-	// float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-	// if(projCoords.z > 1.0)
-    //	shadow = 0.0;
+	/* vec3 normal = normalize(our_normal);
+	float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);  
+	float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+	if(projCoords.z > 1.0)
+		shadow = 0.0; */
 
 
     // This is the final version of the shadow mapping with shadow bias to correct the shadow acne
-    /*vec3 normal = normalize(our_normal);
+    vec3 normal = normalize(our_normal);
 	float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.001);  
 	float shadow = 0.0;
 	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; ++x)
 	{
-	    for(int y = -1; y <= 1; ++y)
-	    {
+		for(int y = -1; y <= 1; ++y)
+		{
 	        float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-	        shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
-	    }    
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+		}    
 	}
 	shadow /= 9.0;
 	if(projCoords.z > 1.0)
-        shadow = 0.0;*/
+        shadow = 0.0;
 
     return shadow;
 }
@@ -114,7 +114,7 @@ float calculateShadow(vec3 lightDir){
 vec3 calculateDirectionalLight(Light light, vec3 direction){
 	// Ambient
     vec3 ambient  = light.ambient * vec3(texture(texture1, our_uv));
-  	
+
     // Diffuse 
     vec3 normal = normalize(our_normal);
     vec3 lightDir = normalize(-direction);

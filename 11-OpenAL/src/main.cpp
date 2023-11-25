@@ -857,14 +857,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcef(source[1], AL_PITCH, 1.0f);
 	alSourcef(source[1], AL_GAIN, 0.5f);
 	alSourcei(source[1], AL_BUFFER, buffer[1]);
-	alSourcei(source[1], AL_LOOPING, AL_TRUE);
+	alSourcei(source[1], AL_LOOPING, AL_FALSE);
 	alSourcef(source[1], AL_MAX_DISTANCE, 2000);
 
 	// Source 2
 	alSourcef(source[2], AL_PITCH, 1.0f);
 	alSourcef(source[2], AL_GAIN, 0.3f);
 	alSourcei(source[2], AL_BUFFER, buffer[2]);
-	alSourcei(source[2], AL_LOOPING, AL_TRUE);
+	alSourcei(source[2], AL_LOOPING, AL_FALSE);
 	alSourcef(source[2], AL_MAX_DISTANCE, 2000);
 }
 
@@ -1222,6 +1222,7 @@ bool processInput(bool continueApplication) {
 		isJump = true;
 		startTimeJump = currTime;
 		tmv = 0;
+		sourcesPlay[1] = true;
 	}
 
 	glfwPollEvents();
@@ -1625,6 +1626,7 @@ void applicationLoop() {
 		if(modelMatrixMayow[3][1] < terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2])){
 			isJump = false;
 			modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
+			alSourceStop(source[1]);
 		}
 		glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021f));
